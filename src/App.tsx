@@ -52,6 +52,7 @@ function App() {
                             { value: 20, label: 'sell data' },
                             { value: 50, label: 'a bit more private' },
                             { value: 80, label: 'not so public' },
+                            { value: 100, label: 'ultra ninja' }
                         ]}
                     />
                 </Container>
