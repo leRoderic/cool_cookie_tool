@@ -1,7 +1,10 @@
 ## Test extension with Chrome
 1. Build the project
 
-```npm run build```
+```
+npm install
+npm run build
+```
 
 2. Go to Chrome / Extensions and enable developer mode
 3. Click on 'Load unpacked'
