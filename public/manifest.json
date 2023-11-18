@@ -4,12 +4,19 @@
   "description": "TMA project 2023",
   "version": "1.0",
   "action": {
-    "default_popup": "index.html",
-    "default_icon": "logo192.png"
+    "default_popup": "index.html"
   },
   "short_name": "CCT",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "permissions": [
+    "tabs",
+    "cookies"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ]
 }

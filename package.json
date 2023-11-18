@@ -1,46 +1,25 @@
 {
-  "name": "cool_cookie_tool",
+  "name": "cool-cookie-tool",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@mantine/core": "^7.1.5",
-    "@mantine/hooks": "^7.1.5",
-    "@mantine/nprogress": "^7.1.5",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.59",
-    "@types/react": "^18.2.31",
-    "@types/react-dom": "^18.2.14",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "next dev",
+    "build": "next build && npm run copy && npm run remove-next && npm run replace",
+    "start": "next start",
+    "lint": "next lint",
+    "copy": "shx cp -R ./out/_next/ ./out/next/",
+    "remove-next": "shx rm -rf ./out/_next/",
+    "replace": "shx sed -i s/_next/next/g ./out/index.html && shx sed -i s/_next/next/g ./out/next/static/chunks/*.js"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "next": "14.0.2",
+    "psl": "^1.9.0",
+    "react": "^18",
+    "react-bootstrap": "^2.9.1",
+    "react-dom": "^18"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "shx": "^0.3.4"
   }
 }
