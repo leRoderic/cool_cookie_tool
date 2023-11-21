@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Cookie Tracker",
+  "version": "1.0",
+  "permissions": ["cookies", "activeTab"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
