@@ -57,22 +57,22 @@ function processData(csvData) {
 
 
 export default function Home() {
-    (async () => {
+    const getCsvData = async () => {
         try {
-          const csv_data = await fetch(csvFileUrl)
-            .then(response => response.text())
-            .then(res => processData(res))
-            .catch(error => {
-              console.error('Error fetching or processing the file:', error);
-              // Handle the error
-              throw error; // Rethrow the error to ensure 'done' is logged
-            });
-      
-          console.log('Processed CSV data:', csv_data);
+          const response = await fetch(csvFileUrl);
+          const csvData = await response.text();
+          const processedData = processData(csvData);
+          console.log('Processed CSV data:', processedData);
+          return processedData;
+        } catch (error) {
+          console.error('Error fetching or processing the file:', error);
+          // Handle the error
+          throw error; // Rethrow the error to ensure 'done' is logged
         } finally {
           console.log('done');
         }
-      })();
+      };
+    const csv_data = getCsvData(); // This is a Promise
 
     const [cookies, setCookies] = useState([{name: "test", purpose: "test", domain: "test", value: "test"}])
     const [gdprStrategy, setGdprStrategy] = useState("allowAll") // allowAll, functionalOnly,
@@ -101,8 +101,9 @@ export default function Home() {
     // }
     const checkCSV = (name) => {
         console.log('In function');
-        if (name == 'twitch.lohp.countryCode') {
-          return true;
+        if (csv_data && name == 'twitch.lohp.countryCode') {
+            console.log(csv_data);
+            return true;
         } else {
           return false;
         }
