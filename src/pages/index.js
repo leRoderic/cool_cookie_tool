@@ -5,7 +5,7 @@ import {Button, ButtonGroup, ButtonToolbar, Col, Container, OverlayTrigger, Row,
 import {useEffect, useState} from "react";
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
-
+const csvFileUrl = 'https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv';
 function extractHostname(url) {
     var hostname;
     //find & remove protocol (http, ftp, etc.) and get hostname
@@ -23,8 +23,42 @@ function extractHostname(url) {
 
     return hostname;
 }
+function processData(csvData) {
+    var lines = csvData.split('\n');
+    var result = [];
+    var headers = lines[0].split(',');
+    var cookieMap = new Map();
+    for (var i = 1; i < lines.length; i++) {
+      var obj = {};
+      var currentline = lines[i].split(',');
+      for (var j = 0; j < headers.length; j++) {
+        obj[headers[j]] = currentline[j];
+      }
+      //result.push(obj);
+      cookieMap.set(obj['ID'], obj)
+    }
+    // console.log(cookieMap);
+    return cookieMap
+}
+
 
 export default function Home() {
+    (async () => {
+        try {
+          const csv_data = await fetch(csvFileUrl)
+            .then(response => response.text())
+            .then(res => processData(res))
+            .catch(error => {
+              console.error('Error fetching or processing the file:', error);
+              // Handle the error
+              throw error; // Rethrow the error to ensure 'done' is logged
+            });
+      
+          console.log('Processed CSV data:', csv_data);
+        } finally {
+          console.log('done');
+        }
+      })();
 
     const [cookies, setCookies] = useState([{name: "test", purpose: "test", domain: "test", value: "test"}])
 
@@ -46,6 +80,19 @@ export default function Home() {
     useEffect(() => {
         loadCookies()
     }, []);
+    // if (csv_data.has("f42b671a-b7ba-4e34-a886-6fbb1705d979")){
+    //     console.log("AAAAAA")
+    // }else{
+    //     console.log("BBBBB")
+    // }
+    const checkCSV = (name) => {
+        console.log('In function');
+        if (name == 'twitch.lohp.countryCode') {
+          return true;
+        } else {
+          return false;
+        }
+    };
     return (
         <div style={{backgroundColor: "white"}}>
             <Head>
@@ -70,6 +117,7 @@ export default function Home() {
                                 <th style={{maxWidth: "30px", wordWrap: "break-word"}}>Name</th>
                                 <th>Purpose</th>
                                 <th>Domain</th>
+                                <th>in CSV</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -78,6 +126,7 @@ export default function Home() {
                                     <td>{cookie.name}</td>
                                     <td>{cookie.purpose}</td>
                                     <td>{cookie.domain}</td>
+                                    <td>{checkCSV(cookie.name) ? 'Yes' : 'No'}</td>
                                     <td>
                                         <OverlayTrigger overlay={<div style={{color: "black"}}>{cookie.value}</div>}
                                                         placement={"bottom"}>
