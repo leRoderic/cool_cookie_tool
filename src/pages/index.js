@@ -6,6 +6,10 @@ import {useEffect, useState} from "react";
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
 
+let blockedDomains = []
+let blockAll = false
+let allowAll = false
+
 function extractHostname(url) {
     var hostname;
     //find & remove protocol (http, ftp, etc.) and get hostname
@@ -45,6 +49,7 @@ export default function Home() {
     }
     useEffect(() => {
         loadCookies()
+        DeleteAllBlockedDomainsCookies()
     }, []);
     return (
         <div style={{backgroundColor: "white"}}>
@@ -54,8 +59,9 @@ export default function Home() {
             <main>
                 <Container style={{marginTop: "1em", marginLeft: "1em", marginRight: "1em"}}>
                     <Row>
-                        <Col><Button variant={"danger"} onClick={loadCookies}>Block all</Button></Col>
-                        <Col><Button variant={"success"}>Allow all</Button></Col>
+                        <Col><Button variant={"danger"} onClick={BlockAllCookies}>Block all</Button></Col>
+                        <Col><Button variant={"success"} onClick={AllowAllCookies}>Allow all</Button></Col>
+                        <Col><Button onClick={BlockDomainCookies}>Block this domain</Button></Col>
                     </Row>
                     <Row style={{marginTop: "0.5em"}}>
                         <Col><Button variant={"outline-dark"}>Marketing</Button></Col>
@@ -93,4 +99,71 @@ export default function Home() {
             </main>
         </div>
     )
+}
+
+function AllowAllCookies()
+{
+    console.log("AllowAllCookies")
+    if (!allowAll)
+    {
+        allowAll = true
+        blockAll = false
+    }
+    else
+    {
+        allowAll = false
+    }
+}
+
+function BlockAllCookies()
+{
+    console.log("BlockAllCookies")
+    if (!blockAll)
+    {
+        blockAll = true
+        allowAll = false
+    }
+    else
+    {
+        blockAll = false
+    }
+}
+
+function BlockDomainCookies()
+{
+    const domain = window.location.hostname
+    console.log("BlockDomainCookies")
+    if (!blockedDomains.includes(domain))
+    {
+        blockedDomains.push(domain)
+        DeleteDomainCookies(domain)
+    }
+    console.log(blockedDomains)
+}
+
+async function DeleteDomainCookies(domain)
+{
+    console.log("DeleteDomainCookies")
+    let cookiesDeleted = 0;
+    try {
+        const cookies = await chrome.cookies.getAll({ domain });
+
+        if (cookies.length === 0) {
+        return 'No cookies found';
+        }
+
+        let pending = cookies.map(deleteCookie);
+        await Promise.all(pending);
+
+        cookiesDeleted = pending.length;
+    } catch (error) {
+        return `Unexpected error: ${error.message}`;
+    }
+
+    return `Deleted ${cookiesDeleted} cookie(s).`;
+}
+
+async function DeleteAllBlockedDomainsCookies()
+{
+    blockedDomains.forEach((domain) => DeleteDomainCookies(domain))
 }
