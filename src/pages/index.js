@@ -154,7 +154,6 @@ export default function Home() {
                                 <th>Purpose</th>
                                 <th>Domain</th>
                                 <th>in CSV</th>
-                                <th>in CSV</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -163,7 +162,6 @@ export default function Home() {
                                     <td>{cookie.name}</td>
                                     <td>{cookie.purpose}</td>
                                     <td>{cookie.domain}</td>
-                                    <td>{checkCSV(cookie.name) ? 'Yes' : 'No'}</td>
                                     <td>{checkCSV(cookie.name) ? 'Yes' : 'No'}</td>
                                     <td>
                                         <OverlayTrigger overlay={<div style={{color: "black"}}>{cookie.value}</div>}
