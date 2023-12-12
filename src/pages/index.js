@@ -11,7 +11,7 @@ const gdprStrategies = {
     allowAll: "Allow all",
     functionalOnly: "Functional only",
 }
-const csvFileUrl = 'https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv';
+
 function extractHostname(url) {
     var hostname;
     //find & remove protocol (http, ftp, etc.) and get hostname
@@ -55,25 +55,6 @@ function processData(csvData) {
     return cookieMap
 }
 
-function processData(csvData) {
-    var lines = csvData.split('\n');
-    var result = [];
-    var headers = lines[0].split(',');
-    var cookieMap = new Map();
-    for (var i = 1; i < lines.length; i++) {
-      var obj = {};
-      var currentline = lines[i].split(',');
-      for (var j = 0; j < headers.length; j++) {
-        obj[headers[j]] = currentline[j];
-      }
-      //result.push(obj);
-      cookieMap.set(obj['ID'], obj)
-    }
-    // console.log(cookieMap);
-    return cookieMap
-}
-
-
 export default function Home() {
     const getCsvData = async () => {
         try {
@@ -112,20 +93,6 @@ export default function Home() {
     useEffect(() => {
         //loadCookies()
     }, []);
-    // if (csv_data.has("f42b671a-b7ba-4e34-a886-6fbb1705d979")){
-    //     console.log("AAAAAA")
-    // }else{
-    //     console.log("BBBBB")
-    // }
-    const checkCSV = (name) => {
-        console.log('In function');
-        if (csv_data && name == 'twitch.lohp.countryCode') {
-            console.log(csv_data);
-            return true;
-        } else {
-          return false;
-        }
-    };
     // if (csv_data.has("f42b671a-b7ba-4e34-a886-6fbb1705d979")){
     //     console.log("AAAAAA")
     // }else{
