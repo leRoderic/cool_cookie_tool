@@ -3,8 +3,14 @@ import {Inter} from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import {Button, ButtonGroup, ButtonToolbar, Col, Container, OverlayTrigger, Row, Table} from "react-bootstrap";
 import {useEffect, useState} from "react";
+
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
+
+const gdprStrategies = {
+    allowAll: "Allow all",
+    functionalOnly: "Functional only",
+}
 
 let blockedDomains = []
 let blockAll = false
@@ -28,13 +34,21 @@ function extractHostname(url) {
     return hostname;
 }
 
+function countElementsArrByKey(arr, key) {
+    var res = 0;
+    arr.forEach(function (i) {
+        i.purpose === key ? res++ : res;
+    });
+    return res;
+}
+
 export default function Home() {
 
     const [cookies, setCookies] = useState([{name: "test", purpose: "test", domain: "test", value: "test"}])
-
+    const [gdprStrategy, setGdprStrategy] = useState("allowAll") // allowAll, functionalOnly,
     const loadCookies = async () => {
         console.log("Loading cookies")
-        const allTabs = await chrome.tabs.query({}, async (tabs) => {
+        const allTabs = await chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
             let tabsUrls = tabs.map((tab) => psl.get(extractHostname(tab.url)))
             await chrome.cookies.getAll({}, (cookies) => {
                 let arr = []
@@ -48,7 +62,7 @@ export default function Home() {
         });
     }
     useEffect(() => {
-        loadCookies()
+        //loadCookies()
         DeleteAllBlockedDomainsCookies()
     }, []);
     return (
@@ -59,15 +73,37 @@ export default function Home() {
             <main>
                 <Container style={{marginTop: "1em", marginLeft: "1em", marginRight: "1em"}}>
                     <Row>
+                        <Col>
+                            <div className="dropdown">
+                                <button className="btn btn-primary dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false">
+                                    {gdprStrategies[gdprStrategy]}
+                                </button>
+                                <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a className="dropdown-item" href="#">{gdprStrategies.allowAll}</a>
+                                    <a className="dropdown-item" href="#">{gdprStrategies.functionalOnly}</a>
+                                </div>
+                            </div>
+                        </Col>
                         <Col><Button variant={"danger"} onClick={BlockAllCookies}>Block all</Button></Col>
                         <Col><Button variant={"success"} onClick={AllowAllCookies}>Allow all</Button></Col>
                         <Col><Button onClick={BlockDomainCookies}>Block this domain</Button></Col>
                     </Row>
                     <Row style={{marginTop: "0.5em"}}>
-                        <Col><Button variant={"outline-dark"}>Marketing</Button></Col>
-                        <Col><Button variant={"outline-dark"}>Analytics</Button></Col>
-                        <Col><Button variant={"outline-dark"}>Functional</Button></Col>
-                        <Col><Button variant={"outline-dark"}>Tracking</Button></Col>
+                        <Col><Button variant={"outline-dark"}>Marketing <span className="badge badge-dark"
+                                                                              style={{backgroundColor: "black"}}>
+                            {countElementsArrByKey(cookies, "marketing")}
+                        </span></Button></Col>
+                        <Col><Button variant={"outline-dark"}>Analytics <span className="badge badge-dark"
+                                                                              style={{backgroundColor: "black"}}>
+                            {countElementsArrByKey(cookies, "analytics")}</span></Button></Col>
+                        <Col><Button variant={"outline-dark"}>Tracking <span className="badge badge-dark"
+                                                                             style={{backgroundColor: "black"}}>
+                            {countElementsArrByKey(cookies, "tracking")}</span></Button></Col>
+                        <Col><Button variant={"outline-dark"}>Functional <span className="badge badge-dark"
+                                                                               style={{backgroundColor: "black"}}>
+                            {countElementsArrByKey(cookies, "functional")}</span></Button></Col>
                     </Row>
                     <Row style={{marginTop: "0.5em"}}>
                         <Table striped bordered hover variant={"light"}>
