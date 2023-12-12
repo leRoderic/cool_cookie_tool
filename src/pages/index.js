@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
-
+const csvFileUrl = 'https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv';
 const gdprStrategies = {
     allowAll: "Allow all",
     functionalOnly: "Functional only",
@@ -37,6 +37,24 @@ function countElementsArrByKey(arr, key) {
     });
     return res;
 }
+function processData(csvData) {
+    var lines = csvData.split('\n');
+    var result = [];
+    var headers = lines[0].split(',');
+    var cookieMap = new Map();
+    for (var i = 1; i < lines.length; i++) {
+      var obj = {};
+      var currentline = lines[i].split(',');
+      for (var j = 0; j < headers.length; j++) {
+        obj[headers[j]] = currentline[j];
+      }
+      //result.push(obj);
+      cookieMap.set(obj['ID'], obj)
+    }
+    // console.log(cookieMap);
+    return cookieMap
+}
+
 function processData(csvData) {
     var lines = csvData.split('\n');
     var result = [];
@@ -108,6 +126,20 @@ export default function Home() {
           return false;
         }
     };
+    // if (csv_data.has("f42b671a-b7ba-4e34-a886-6fbb1705d979")){
+    //     console.log("AAAAAA")
+    // }else{
+    //     console.log("BBBBB")
+    // }
+    const checkCSV = (name) => {
+        console.log('In function');
+        if (csv_data && name == 'twitch.lohp.countryCode') {
+            console.log(csv_data);
+            return true;
+        } else {
+          return false;
+        }
+    };
     return (
         <div style={{backgroundColor: "white"}}>
             <Head>
@@ -155,6 +187,7 @@ export default function Home() {
                                 <th>Purpose</th>
                                 <th>Domain</th>
                                 <th>in CSV</th>
+                                <th>in CSV</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -163,6 +196,7 @@ export default function Home() {
                                     <td>{cookie.name}</td>
                                     <td>{cookie.purpose}</td>
                                     <td>{cookie.domain}</td>
+                                    <td>{checkCSV(cookie.name) ? 'Yes' : 'No'}</td>
                                     <td>{checkCSV(cookie.name) ? 'Yes' : 'No'}</td>
                                     <td>
                                         <OverlayTrigger overlay={<div style={{color: "black"}}>{cookie.value}</div>}
