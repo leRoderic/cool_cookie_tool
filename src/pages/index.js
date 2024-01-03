@@ -7,6 +7,7 @@ import {useEffect, useState} from "react";
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
 const csvFileUrl = 'https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv';
+
 const gdprStrategies = {
     allowAll: "Allow all",
     functionalOnly: "Functional only",
@@ -37,6 +38,7 @@ function countElementsArrByKey(arr, key) {
     });
     return res;
 }
+
 function processData(csvData) {
     var lines = csvData.split('\n');
     var result = [];
@@ -56,13 +58,18 @@ function processData(csvData) {
 }
 
 export default function Home() {
-    const getCsvData = async () => {
+
+    const [cookies, setCookies] = useState([{name: "test", purpose: "test", domain: "test", value: "test"}])
+    const [gdprStrategy, setGdprStrategy] = useState("allowAll") // allowAll, functionalOnly,
+    const [csvData, setCsvData] = useState([]);
+    
+    const fetchCsvData  = async () => {
         try {
           const response = await fetch(csvFileUrl);
           const csvData = await response.text();
           const processedData = processData(csvData);
           console.log('Processed CSV data:', processedData);
-          return processedData;
+          setCsvData(processedData);
         } catch (error) {
           console.error('Error fetching or processing the file:', error);
           // Handle the error
@@ -71,10 +78,7 @@ export default function Home() {
           console.log('done');
         }
       };
-    const csv_data = getCsvData(); // This is a Promise
 
-    const [cookies, setCookies] = useState([{name: "test", purpose: "test", domain: "test", value: "test"}])
-    const [gdprStrategy, setGdprStrategy] = useState("allowAll") // allowAll, functionalOnly,
     const loadCookies = async () => {
         console.log("Loading cookies")
         const allTabs = await chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
@@ -92,16 +96,15 @@ export default function Home() {
     }
     useEffect(() => {
         //loadCookies()
+        fetchCsvData();
     }, []);
-    // if (csv_data.has("f42b671a-b7ba-4e34-a886-6fbb1705d979")){
-    //     console.log("AAAAAA")
-    // }else{
-    //     console.log("BBBBB")
-    // }
+
     const checkCSV = (name) => {
-        console.log('In function');
-        if (csv_data && name == 'twitch.lohp.countryCode') {
-            console.log(csv_data);
+        console.log(name);
+        console.log(csvData.keys())
+        console.log(csvData.values())
+        if (name in csvData.keys()) {
+            console.log("PRUEBAAAAAAAAAAAAAAAA");
             return true;
         } else {
           return false;
@@ -162,7 +165,7 @@ export default function Home() {
                                     <td>{cookie.name}</td>
                                     <td>{cookie.purpose}</td>
                                     <td>{cookie.domain}</td>
-                                    <td>{checkCSV(cookie.name) ? 'Yes' : 'No'}</td>
+                                    <td>{checkCSV(cookie.value) ? 'Yes' : 'No'}</td>
                                     <td>
                                         <OverlayTrigger overlay={<div style={{color: "black"}}>{cookie.value}</div>}
                                                         placement={"bottom"}>
