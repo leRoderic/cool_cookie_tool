@@ -68,7 +68,7 @@ export default function Home() {
           const response = await fetch(csvFileUrl);
           const csvData = await response.text();
           const processedData = processData(csvData);
-          console.log('Processed CSV data:', processedData);
+          // console.log('Processed CSV data:', processedData);
           setCsvData(processedData);
         } catch (error) {
           console.error('Error fetching or processing the file:', error);
@@ -99,16 +99,15 @@ export default function Home() {
         fetchCsvData();
     }, []);
 
-    const checkCSV = (name) => {
-        console.log(name);
-        console.log(csvData.keys())
-        console.log(csvData.values())
-        if (name in csvData.keys()) {
-            console.log("PRUEBAAAAAAAAAAAAAAAA");
-            return true;
-        } else {
-          return false;
+    const checkCSV = (cookie_name) => {
+        // console.log(cookie_name);
+        for (const [key, value] of csvData) {
+            if (value["Cookie / Data Key name"] === cookie_name) {
+                // console.log("Dentro");
+                return value["Category"];
+            }
         }
+        return "Without Category";
     };
     return (
         <div style={{backgroundColor: "white"}}>
@@ -156,7 +155,7 @@ export default function Home() {
                                 <th style={{maxWidth: "30px", wordWrap: "break-word"}}>Name</th>
                                 <th>Purpose</th>
                                 <th>Domain</th>
-                                <th>in CSV</th>
+                                <th>Category</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -165,7 +164,7 @@ export default function Home() {
                                     <td>{cookie.name}</td>
                                     <td>{cookie.purpose}</td>
                                     <td>{cookie.domain}</td>
-                                    <td>{checkCSV(cookie.value) ? 'Yes' : 'No'}</td>
+                                    <td>{checkCSV(cookie.name)}</td>
                                     <td>
                                         <OverlayTrigger overlay={<div style={{color: "black"}}>{cookie.value}</div>}
                                                         placement={"bottom"}>
