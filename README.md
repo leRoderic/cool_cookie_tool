@@ -1,6 +1,6 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## How to run 
+## How to run
 
 ### Prerequisites
 - Have a computer on hand.
@@ -17,9 +17,17 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
     ```
 
 ### Running the development server
-```bash
-npm run dev
-```
+> **IMPORTANT NOTE**
+>
+> The Chrome API used by the extension is not available when developing locally. 
+> 
+> To test the extension, you must build it and install it in Chrome.
+
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+2. Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ### Build and deploy the Chrome extension
 1. If running, stop the development server.
