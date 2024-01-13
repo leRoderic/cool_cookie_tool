@@ -22,6 +22,29 @@ const gdprStrategies = {
     },
 }
 
+const cookieCategories = {
+    marketing: {
+        key: "marketing",
+        title: "Marketing",
+    },
+    analytics: {
+        key: "analytics",
+        title: "Analytics",
+    },
+    functional: {
+        key: "functional",
+        title: "Functional",
+    },
+    other: {
+        key: "other",
+        title: "Other",
+    },
+    none: {
+        key: "none",
+        title: "None",
+    }
+}
+
 const gdprResults = {
     unknown: {
         key: "unknown",
@@ -85,10 +108,17 @@ export default function Home() {
         domain: "test",
         value: "test"
     }])
+    const [cookiesTable, setCookiesTable] = useState([{
+        name: "Test",
+        purpose: "test",
+        domain: "test",
+        value: "test"
+    }])
     const [gdprStrategy, setGdprStrategy] = useState(gdprStrategies.allowAll)
     const [performingGDPRCheck, setPerformingGDPRCheck] = useState(false);
     const [gdprCheckResult, setGdprCheckResult] = useState(gdprResults.unknown);
     const [blockedDomains, setBlockedDomains] = useState([])
+    const [cookieCategoryFilter, setCookieCategoryFilter] = useState(cookieCategories.none)
 
     const fetchCsvData = async () => {
         try {
@@ -115,6 +145,7 @@ export default function Home() {
                     }
                 })
                 setCookies(arr)
+                setCookiesTable(arr)
             })
         });
     }
@@ -131,6 +162,33 @@ export default function Home() {
         }
         return "";
     };
+
+    function filterByMarketingPurpose() {
+        filterCookiesByPurpose(cookieCategories.marketing)
+    }
+
+    function filterByAnalyticsPurpose() {
+        filterCookiesByPurpose(cookieCategories.analytics)
+    }
+
+    function filterByFunctionalPurpose() {
+        filterCookiesByPurpose(cookieCategories.functional)
+    }
+
+    function filterByOtherPurpose() {
+        console.log("ASD")
+        filterCookiesByPurpose(cookieCategories.other)
+    }
+
+    function filterCookiesByPurpose(purpose) {
+        if (purpose.key === cookieCategoryFilter.key) {
+            setCookiesTable(cookies)
+            setCookieCategoryFilter(cookieCategories.none)
+        } else {
+            setCookieCategoryFilter(purpose)
+            setCookiesTable(cookies.filter((cookie) => cookie.purpose === purpose))
+        }
+    }
 
     function blockAllCookies() {
         setGdprStrategy(gdprStrategies.blockAll)
@@ -217,7 +275,7 @@ export default function Home() {
                     }}>
                         {text}</div>}
                                 placement={"bottom"}>
-                    <Button variant={"dark"} size={"sm"}>{text.substring(0, 30) + "..."}</Button>
+                    <Button variant={"dark"} size={"sm"}>{text.substring(0, 10) + "..."}</Button>
                 </OverlayTrigger>
             )
         }
@@ -283,29 +341,78 @@ export default function Home() {
                     </Row>
                     <Row style={{marginTop: "0.5em"}}>
                         <Col>
-                            <Button variant={"outline-dark"}>Marketing <span className="badge badge-dark"
-                                                                             style={{backgroundColor: "black"}}>
+                            {cookieCategoryFilter.key !== cookieCategories.marketing.key &&
+                                <Button variant={"outline-dark"} onClick={filterByMarketingPurpose}>
+                                    {cookieCategories.marketing.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
                             {countElementsArrByPurposeKey(cookies, "Marketing")}
                         </span>
-                            </Button>
+                                </Button>
+                            }
+                            {cookieCategoryFilter.key === cookieCategories.marketing.key &&
+                                <Button variant={"warning"} onClick={filterByMarketingPurpose}>
+                                    {cookieCategories.marketing.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
+                            {countElementsArrByPurposeKey(cookies, "Marketing")}
+                        </span>
+                                </Button>
+                            }
                         </Col>
                         <Col>
-                            <Button variant={"outline-dark"}>Analytics <span className="badge badge-dark"
-                                                                             style={{backgroundColor: "black"}}>
+                            {cookieCategoryFilter.key !== cookieCategories.analytics.key &&
+                                <Button variant={"outline-dark"} onClick={filterByAnalyticsPurpose}>
+                                    {cookieCategories.analytics.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
                             {countElementsArrByPurposeKey(cookies, "Analytics")}</span>
-                            </Button>
+                                </Button>
+                            }
+                            {cookieCategoryFilter.key === cookieCategories.analytics.key &&
+                                <Button variant={"warning"} onClick={filterByAnalyticsPurpose}>
+                                    {cookieCategories.analytics.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
+                            {countElementsArrByPurposeKey(cookies, "Analytics")}</span>
+                                </Button>
+                            }
                         </Col>
                         <Col>
-                            <Button variant={"outline-dark"}>Functional <span className="badge badge-dark"
-                                                                              style={{backgroundColor: "black"}}>
+                            {cookieCategoryFilter.key !== cookieCategories.functional.key &&
+                                <Button variant={"outline-dark"}
+                                        onClick={filterByFunctionalPurpose}>{cookieCategories.functional.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
                             {countElementsArrByPurposeKey(cookies, "Functional")}</span>
-                            </Button>
+                                </Button>
+                            }
+                            {cookieCategoryFilter.key === cookieCategories.functional.key &&
+                                <Button variant={"warning"} onClick={filterByFunctionalPurpose}>
+                                    {cookieCategories.functional.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
+                            {countElementsArrByPurposeKey(cookies, "Functional")}</span>
+                                </Button>
+                            }
                         </Col>
                         <Col>
-                            <Button variant={"outline-dark"}>Other <span className="badge badge-dark"
-                                                                         style={{backgroundColor: "black"}}>
+                            {cookieCategoryFilter.key !== cookieCategories.other.key &&
+                                <Button variant={"outline-dark"} onClick={filterByOtherPurpose}>
+                                    {cookieCategories.other.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
                             {countElementsArrByPurposeKey(cookies, "")}</span>
-                            </Button>
+                                </Button>
+                            }
+                            {cookieCategoryFilter.key === cookieCategories.other.key &&
+                                <Button variant={"warning"} onClick={filterByOtherPurpose}>
+                                    {cookieCategories.other.title} <span
+                                    className="badge badge-dark"
+                                    style={{backgroundColor: "black"}}>
+                            {countElementsArrByPurposeKey(cookies, "")}</span>
+                                </Button>
+                            }
                         </Col>
                     </Row>
                     <Row style={{marginTop: "0.5em"}}>
@@ -319,7 +426,7 @@ export default function Home() {
                             </tr>
                             </thead>
                             <tbody>
-                            {cookies.map((cookie, i) => <tr key={i}>
+                            {cookiesTable.map((cookie, i) => <tr key={i}>
                                     <td style={{
                                         maxWidth: "140px",
                                         wordWrap: "break-word"
