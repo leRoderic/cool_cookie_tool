@@ -252,7 +252,10 @@ async function DeleteDomainCookies(domain)
 
 async function DeleteAllBlockedDomainsCookies()
 {
-    blockedDomains.forEach((domain) => DeleteDomainCookies(domain))
+    if (!allowAll)
+    {
+        blockedDomains.forEach((domain) => DeleteDomainCookies(domain))
+    }
 }
 
 function deleteCookie(cookie) {
