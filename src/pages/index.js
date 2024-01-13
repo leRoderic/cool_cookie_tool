@@ -140,20 +140,26 @@ export default function Home() {
         setGdprStrategy(gdprStrategies.allowAll)
     }
 
-    function blockDomainCookies() {
+    async function blockDomainCookies() {
         setGdprStrategy(gdprStrategies.blockDomain)
 
-        const domain = window.location.hostname
-
-        if (!blockedDomains.includes(domain)) {
-            blockedDomains.push(domain)
-            setBlockedDomains(blockedDomains)
-            deleteDomainCookies(domain)
-        }
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            var tab = tabs[0];
+            var url = new URL(tab.url)
+            var domain = url.hostname
+            // const domain = window.location.hostname
+            // console.log(domain)
+            
+            if (!blockedDomains.includes(domain)) {
+                blockedDomains.push(domain)
+                setBlockedDomains(blockedDomains)
+                deleteDomainCookies(domain)
+            }
+        })
     }
 
     async function deleteDomainCookies(domain) {
-        console.log("DeleteDomainCookies")
+        console.log("DeleteDomainCookies: " + domain)
         let cookiesDeleted = 0;
         try {
             const cookies = await chrome.cookies.getAll({domain});
@@ -183,8 +189,6 @@ export default function Home() {
     function deleteCookie(cookie) {
         const protocol = cookie.secure ? 'https:' : 'http:';
         const cookieUrl = `${protocol}//${cookie.domain}${cookie.path}`;
-
-        console.log("ASD")
 
         return chrome.cookies.remove({
             url: cookieUrl,
