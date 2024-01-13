@@ -26,22 +26,27 @@ const cookieCategories = {
     marketing: {
         key: "marketing",
         title: "Marketing",
+        filter: "Marketing"
     },
     analytics: {
         key: "analytics",
         title: "Analytics",
+        filter: "Analytics"
     },
     functional: {
         key: "functional",
         title: "Functional",
+        filter: "Functional"
     },
     other: {
         key: "other",
         title: "Other",
+        filter: ""
     },
     none: {
         key: "none",
         title: "None",
+        filter: ""
     }
 }
 
@@ -176,7 +181,6 @@ export default function Home() {
     }
 
     function filterByOtherPurpose() {
-        console.log("ASD")
         filterCookiesByPurpose(cookieCategories.other)
     }
 
@@ -186,7 +190,7 @@ export default function Home() {
             setCookieCategoryFilter(cookieCategories.none)
         } else {
             setCookieCategoryFilter(purpose)
-            setCookiesTable(cookies.filter((cookie) => cookie.purpose === purpose))
+            setCookiesTable(cookies.filter((cookie) => cookie.purpose === purpose.filter))
         }
     }
 
