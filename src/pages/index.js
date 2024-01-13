@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
+const csvFileUrl = 'https://raw.githubusercontent.com/jkwakman/Open-Cookie-Database/master/open-cookie-database.csv';
 
 const gdprStrategies = {
     allowAll: "Allow all",
@@ -42,10 +43,46 @@ function countElementsArrByKey(arr, key) {
     return res;
 }
 
+function processData(csvData) {
+    var lines = csvData.split('\n');
+    var result = [];
+    var headers = lines[0].split(',');
+    var cookieMap = new Map();
+    for (var i = 1; i < lines.length; i++) {
+      var obj = {};
+      var currentline = lines[i].split(',');
+      for (var j = 0; j < headers.length; j++) {
+        obj[headers[j]] = currentline[j];
+      }
+      //result.push(obj);
+      cookieMap.set(obj['ID'], obj)
+    }
+    // console.log(cookieMap);
+    return cookieMap
+}
+
 export default function Home() {
 
     const [cookies, setCookies] = useState([{name: "test", purpose: "test", domain: "test", value: "test"}])
     const [gdprStrategy, setGdprStrategy] = useState("allowAll") // allowAll, functionalOnly,
+    const [csvData, setCsvData] = useState([]);
+    
+    const fetchCsvData  = async () => {
+        try {
+          const response = await fetch(csvFileUrl);
+          const csvData = await response.text();
+          const processedData = processData(csvData);
+          // console.log('Processed CSV data:', processedData);
+          setCsvData(processedData);
+        } catch (error) {
+          console.error('Error fetching or processing the file:', error);
+          // Handle the error
+          throw error; // Rethrow the error to ensure 'done' is logged
+        } finally {
+          console.log('done');
+        }
+      };
+
     const loadCookies = async () => {
         console.log("Loading cookies")
         const allTabs = await chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
@@ -63,8 +100,20 @@ export default function Home() {
     }
     useEffect(() => {
         //loadCookies()
+        fetchCsvData();
         DeleteAllBlockedDomainsCookies()
     }, []);
+
+    const checkCSV = (cookie_name) => {
+        // console.log(cookie_name);
+        for (const [key, value] of csvData) {
+            if (value["Cookie / Data Key name"] === cookie_name) {
+                // console.log("Dentro");
+                return value["Category"];
+            }
+        }
+        return "Without Category";
+    };
     return (
         <div style={{backgroundColor: "white"}}>
             <Head>
@@ -112,6 +161,7 @@ export default function Home() {
                                 <th style={{maxWidth: "30px", wordWrap: "break-word"}}>Name</th>
                                 <th>Purpose</th>
                                 <th>Domain</th>
+                                <th>Category</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -120,6 +170,7 @@ export default function Home() {
                                     <td>{cookie.name}</td>
                                     <td>{cookie.purpose}</td>
                                     <td>{cookie.domain}</td>
+                                    <td>{checkCSV(cookie.name)}</td>
                                     <td>
                                         <OverlayTrigger overlay={<div style={{color: "black"}}>{cookie.value}</div>}
                                                         placement={"bottom"}>
