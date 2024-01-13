@@ -40,11 +40,6 @@ const gdprResults = {
     }
 }
 
-
-let blockedDomains = []
-let blockAll = false
-let allowAll = false
-
 function extractHostname(url) {
     var hostname;
     if (url.indexOf("//") > -1) {
@@ -58,7 +53,7 @@ function extractHostname(url) {
     return hostname;
 }
 
-function countElementsArrByKey(arr, key) {
+function countElementsArrByPurposeKey(arr, key) {
     var res = 0;
     arr.forEach(function (i) {
         i.purpose === key ? res++ : res;
@@ -93,6 +88,7 @@ export default function Home() {
     const [gdprStrategy, setGdprStrategy] = useState(gdprStrategies.allowAll)
     const [performingGDPRCheck, setPerformingGDPRCheck] = useState(false);
     const [gdprCheckResult, setGdprCheckResult] = useState(gdprResults.unknown);
+    const [blockedDomains, setBlockedDomains] = useState([])
 
     const fetchCsvData = async () => {
         try {
@@ -115,7 +111,6 @@ export default function Home() {
                 cookies.map((cookie) => {
                     if (tabsUrls.includes(psl.get(extractHostname(cookie.domain)))) {
                         cookie.purpose = checkCSV(csvData, cookie.name)
-                        console.log(cookie)
                         arr.push(cookie)
                     }
                 })
@@ -126,7 +121,7 @@ export default function Home() {
     useEffect(() => {
         fetchCsvData()
         deleteAllBlockedDomainsCookies()
-    }, [gdprStrategy]);
+    }, [gdprStrategy, blockedDomains]);
 
     const checkCSV = (csvData, cookie_name) => {
         for (const [key, value] of csvData) {
@@ -139,39 +134,32 @@ export default function Home() {
 
     function blockAllCookies() {
         setGdprStrategy(gdprStrategies.blockAll)
-
-        if (!blockAll) {
-            blockAll = true
-            allowAll = false
-        } else {
-            blockAll = false
-        }
     }
 
     function allowAllCookies() {
         setGdprStrategy(gdprStrategies.allowAll)
-
-        if (!allowAll) {
-            allowAll = true
-            blockAll = false
-        } else {
-            allowAll = false
-        }
     }
 
-    function blockDomainCookies() {
+    async function blockDomainCookies() {
         setGdprStrategy(gdprStrategies.blockDomain)
 
-        const domain = window.location.hostname
-
-        if (!blockedDomains.includes(domain)) {
-            blockedDomains.push(domain)
-            deleteDomainCookies(domain)
-        }
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            var tab = tabs[0];
+            var url = new URL(tab.url)
+            var domain = url.hostname
+            // const domain = window.location.hostname
+            // console.log(domain)
+            
+            if (!blockedDomains.includes(domain)) {
+                blockedDomains.push(domain)
+                setBlockedDomains(blockedDomains)
+                deleteDomainCookies(domain)
+            }
+        })
     }
 
     async function deleteDomainCookies(domain) {
-        console.log("DeleteDomainCookies")
+        console.log("DeleteDomainCookies: " + domain)
         let cookiesDeleted = 0;
         try {
             const cookies = await chrome.cookies.getAll({domain});
@@ -192,7 +180,8 @@ export default function Home() {
     }
 
     async function deleteAllBlockedDomainsCookies() {
-        if (!allowAll) {
+        console.log("DeleteAllBlockedDomainsCookies")
+        if (!gdprStrategy.key !== gdprStrategies.allowAll.key) {
             blockedDomains.forEach((domain) => deleteDomainCookies(domain))
         }
     }
@@ -300,20 +289,26 @@ export default function Home() {
                         <Col>
                             <Button variant={"outline-dark"}>Marketing <span className="badge badge-dark"
                                                                              style={{backgroundColor: "black"}}>
-                            {countElementsArrByKey(cookies, "Marketing")}
+                            {countElementsArrByPurposeKey(cookies, "Marketing")}
                         </span>
                             </Button>
                         </Col>
                         <Col>
                             <Button variant={"outline-dark"}>Analytics <span className="badge badge-dark"
                                                                              style={{backgroundColor: "black"}}>
-                            {countElementsArrByKey(cookies, "Analytics")}</span>
+                            {countElementsArrByPurposeKey(cookies, "Analytics")}</span>
                             </Button>
                         </Col>
                         <Col>
                             <Button variant={"outline-dark"}>Functional <span className="badge badge-dark"
                                                                               style={{backgroundColor: "black"}}>
-                            {countElementsArrByKey(cookies, "Functional")}</span>
+                            {countElementsArrByPurposeKey(cookies, "Functional")}</span>
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button variant={"outline-dark"}>Other <span className="badge badge-dark"
+                                                                         style={{backgroundColor: "black"}}>
+                            {countElementsArrByPurposeKey(cookies, "")}</span>
                             </Button>
                         </Col>
                     </Row>
