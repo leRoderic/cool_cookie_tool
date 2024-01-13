@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import {Inter} from 'next/font/google'
-import styles from '@/styles/Home.module.css'
-import {Button, ButtonGroup, ButtonToolbar, Col, Container, OverlayTrigger, Row, Table} from "react-bootstrap";
+import {Button, Col, Container, OverlayTrigger, Row, Table} from "react-bootstrap";
 import {useEffect, useState} from "react";
 
 const psl = require('psl');
@@ -15,17 +14,12 @@ const gdprStrategies = {
 
 function extractHostname(url) {
     var hostname;
-    //find & remove protocol (http, ftp, etc.) and get hostname
-
     if (url.indexOf("//") > -1) {
         hostname = url.split('/')[2];
     } else {
         hostname = url.split('/')[0];
     }
-
-    //find & remove port number
     hostname = hostname.split(':')[0];
-    //find & remove "?"
     hostname = hostname.split('?')[0];
 
     return hostname;
