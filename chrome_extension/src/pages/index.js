@@ -2,6 +2,8 @@ import Head from 'next/head'
 import {Inter} from 'next/font/google'
 import {Badge, Button, Col, Container, OverlayTrigger, Row, Spinner, Table} from "react-bootstrap";
 import {useEffect, useState} from "react";
+import axios from "axios";
+import {SELENIUM_SERVER} from "../config/settings.js";
 
 const psl = require('psl');
 const inter = Inter({subsets: ['latin']})
@@ -263,24 +265,41 @@ export default function Home() {
         if (!performingGDPRCheck) {
             setPerformingGDPRCheck(true)
             seleniumPageCheck()
-            // Timeout of 5 seconds
-            setTimeout(() => {
-                setPerformingGDPRCheck(false)
-                setGdprCheckResult(gdprResults.nonCompliant)
-            }, 5000)
         }
     }
 
     async function seleniumPageCheck() {
-        /*console.log
-        let driver = await new Builder().forBrowser(Browser.CHROME).build();
-        try {
-            await driver.get('https://www.google.com/ncr');
-            await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
-            await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
-        } finally {
-            await driver.quit();
-        }*/
+
+        axios.post(SELENIUM_SERVER.url, {website: "https://youtube.com"}, {
+            auth: SELENIUM_SERVER.auth ? {
+                username: SELENIUM_SERVER.username,
+                password: SELENIUM_SERVER.password
+            } : null
+        }).then(res => {
+                const resp = res.data;
+                setPerformingGDPRCheck(false)
+            })
+        /*const _ = await chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
+            let tab = tabs[0];
+            let data = {website: tab.url}
+            axios.post(SELENIUM_SERVER.url, data, {
+                auth: {
+                    username: SELENIUM_SERVER.username,
+                    password: SELENIUM_SERVER.password
+                } ? SELENIUM_SERVER.auth : null
+            })
+                .then(res => {
+                    const resp = res.data;
+                    setPerformingGDPRCheck(false)
+                    if (resp.website_compliant) {
+                        setGdprCheckResult(gdprResults.compliant)
+                    } else if (resp.website_non_compliant) {
+                        setGdprCheckResult(gdprResults.nonCompliant)
+                    } else {
+                        setGdprCheckResult(gdprResults.unknown)
+                    }
+                })
+        })*/
     }
 
     function shortTextIfTooLong(text) {

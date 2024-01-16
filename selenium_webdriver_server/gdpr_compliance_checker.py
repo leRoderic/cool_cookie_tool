@@ -1,4 +1,7 @@
 import csv
+import os
+import sys
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
@@ -24,8 +27,18 @@ def click_button(driver, xpath, action, timeout=10):
 
 def analyze_cookies(driver, action):
     xpath_map = {
-        "accept": "//button[contains(., 'Aceptar') or contains(., 'Accept') or contains(., 'Permitir') or contains(., 'Confirm') or contains(., 'Confirmar') or contains(., 'Agree')]",
-        "decline": "//button[contains(., 'Rechazar') or contains(., 'Reject') or contains(., 'Decline') or contains(., 'Disagree')]"
+        "accept": (
+            "//button["
+            "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÜÑ', 'abcdefghijklmnopqrstuvwxyzáéíóúüñ'), 'accept') or "
+            "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÜÑ', 'abcdefghijklmnopqrstuvwxyzáéíóúüñ'), 'aceptar') or "
+            "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÜÑ', 'abcdefghijklmnopqrstuvwxyzáéíóúüñ'), 'permitir')]"
+        ),
+        "decline": (
+            "//button["
+            "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'decline') or "
+            "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reject') or "
+            "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'rechazar')]"
+        )
     }
     clicked = click_button(driver, xpath_map[action], action.capitalize())
     time.sleep(5)
@@ -39,6 +52,7 @@ def check_trackers(driver):
 
 
 def analyze_website(url, options, service, server_return=False):
+    gdpr_compliant = None
     try:
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
@@ -46,6 +60,8 @@ def analyze_website(url, options, service, server_return=False):
         if not banner_detected_accept:
             print(f"No cookie banner detected on {url}. Skipping...")
             driver.quit()
+            if server_return:
+                return None
             return
 
         driver.delete_all_cookies()
@@ -56,8 +72,6 @@ def analyze_website(url, options, service, server_return=False):
         if cookies_after_accept == cookies_after_decline:
             tracking_cookies = check_trackers(driver)
             gdpr_compliant = len(tracking_cookies) == 0
-            if server_return:
-                return gdpr_compliant and not tracking_cookies
             if not gdpr_compliant:
                 print(f"Non-GDPR compliant cookies found after declining on {url}: {tracking_cookies}")
             else:
@@ -69,12 +83,28 @@ def analyze_website(url, options, service, server_return=False):
         print(f"Error accessing {url}: {e}")
     finally:
         driver.quit()
+        if gdpr_compliant is not None:
+            return gdpr_compliant
+        return None
 
 
 def read_csv_and_analyze(file_path):
     options = Options()
-    options.binary_location = r"chrome-win64\chrome.exe"
-    service = ChromeService(executable_path="chromedriver_win32.exe")
+
+    if os.name == "nt":
+        WD_PATH = "webdrivers/chromedriver_win64.exe"
+    elif os.name == "posix":
+        WD_PATH = "webdrivers/chromedriver_linux64"
+
+    if not WD_PATH:
+        sys.exit("No webdriver")
+
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--incognito")
+    options.add_argument("--lang=es")
+    options.binary_location = "/usr/bin/google-chrome"
+    service = ChromeService(executable_path=WD_PATH)
 
     with open(file_path, mode='r', newline='', encoding='utf-8') as file:
         csv_reader = csv.DictReader(file)
