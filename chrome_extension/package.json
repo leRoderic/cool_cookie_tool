@@ -1,0 +1,26 @@
+{
+  "name": "cool-cookie-tool",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && npm run copy && npm run remove-next && npm run replace",
+    "start": "next start",
+    "lint": "next lint",
+    "copy": "shx cp -R ./out/_next/ ./out/next/",
+    "remove-next": "shx rm -rf ./out/_next/",
+    "replace": "shx sed -i s/_next/next/g ./out/index.html && shx sed -i s/_next/next/g ./out/next/static/chunks/*.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "bootstrap": "^5.3.2",
+    "next": "14.0.2",
+    "psl": "^1.9.0",
+    "react": "^18",
+    "react-bootstrap": "^2.9.1",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "shx": "^0.3.4"
+  }
+}
