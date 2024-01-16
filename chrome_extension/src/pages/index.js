@@ -270,23 +270,14 @@ export default function Home() {
 
     async function seleniumPageCheck() {
 
-        axios.post(SELENIUM_SERVER.url, {website: "https://youtube.com"}, {
-            auth: SELENIUM_SERVER.auth ? {
-                username: SELENIUM_SERVER.username,
-                password: SELENIUM_SERVER.password
-            } : null
-        }).then(res => {
-                const resp = res.data;
-                setPerformingGDPRCheck(false)
-            })
-        /*const _ = await chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
+        const _ = await chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
             let tab = tabs[0];
             let data = {website: tab.url}
             axios.post(SELENIUM_SERVER.url, data, {
-                auth: {
+                auth: SELENIUM_SERVER.auth ? {
                     username: SELENIUM_SERVER.username,
                     password: SELENIUM_SERVER.password
-                } ? SELENIUM_SERVER.auth : null
+                } : null
             })
                 .then(res => {
                     const resp = res.data;
@@ -299,7 +290,7 @@ export default function Home() {
                         setGdprCheckResult(gdprResults.unknown)
                     }
                 })
-        })*/
+        })
     }
 
     function shortTextIfTooLong(text) {
