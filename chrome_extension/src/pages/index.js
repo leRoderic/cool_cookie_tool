@@ -284,7 +284,7 @@ export default function Home() {
                     setPerformingGDPRCheck(false)
                     if (resp.website_compliant) {
                         setGdprCheckResult(gdprResults.compliant)
-                    } else if (!resp.website_non_compliant) {
+                    } else if (!resp.website_compliant && resp.website_compliant !== null) {
                         setGdprCheckResult(gdprResults.nonCompliant)
                     } else {
                         setGdprCheckResult(gdprResults.unknown)
